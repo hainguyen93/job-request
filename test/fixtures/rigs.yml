@@ -1,0 +1,7 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+rig1:
+  code: '13 APU'
+
+rig2:
+  code: '17 Unit A1'

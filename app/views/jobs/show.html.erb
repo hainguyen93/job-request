@@ -1,0 +1,252 @@
+<% provide(:title, 'Job Description') %>
+<div class='row'>
+
+  <!--heading-->
+  <div class='col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3 col-xs-6 col-xs-offset-3'>
+    <h1>Job Description<h1>
+  </div>
+
+  <% if @job.status=='ongoing' %>
+    <% if !current_user.admin? %>
+      
+      <% if !Acceptor.where(user_id: current_user.id, job_id: @job.id).any? %> 
+        <!--Edit button-->
+        <div class='col-md-1 col-md-offset-2  col-sm-1 col-sm-offset-1 col-xs-1 col-xs-offset-1'>
+          <h1><% if ((@job.user.id==current_user.id)) %>
+            <%= button_to "Edit", edit_job_path(@job), method: :get, class: "btn btn-primary btn-block  btn-sm" %>  
+          <% end %></h1>        
+        </div>
+
+        <!--Accept button-->
+        <div class='col-md-1 col-sm-1 col-xs-1'>
+          <h1>
+            <%= form_for :acceptor, url: acceptor_path, method: :post do |a| %>
+              <%= a.hidden_field :job_id, value: @job.id %>
+              <%= a.submit "Accept", class: " btn btn-primary btn-block btn-sm" %>
+            <% end %> 
+          </h1>
+        </div>
+      <% else %>
+        <!--Edit button-->
+        <div class='col-md-1 col-md-offset-3  col-sm-1 col-sm-offset-1 col-xs-1 col-xs-offset-1'>
+          <h1><% if ((@job.user.id==current_user.id)) %>
+            <%= button_to "Edit", edit_job_path(@job), method: :get, class: "btn btn-primary btn-block  btn-sm" %>  
+          <% end %></h1>        
+        </div>
+      <% end %>
+    <% else %>
+      <div class='col-md-1 col-md-offset-2 col-sm-1 col-sm-offset-1 col-xs-1 col-xs-offset-1'>
+        <h1><% if (@job.user.id==current_user.id) %>
+          <%= button_to "Edit", edit_job_path(@job), method: :get, class: "btn btn-primary btn-block btn-sm" %>  
+        <% end %></h1>        
+      </div>
+
+      <div class="col-md-1 col-sm-1 col-xs-1"> 
+         <h1><%= button_to "Delete", job_path(@job), method: :delete, class: "btn btn-primary btn-block btn-sm", 
+                                                       data: { confirm: "You want to remove this job.\n\nAre you sure?" } %> </h1> 
+      </div>
+    <% end %>
+  <% end %>
+</div>
+
+<!--job descriptions-->
+<div class="row outer-box">
+
+  <!--title-->
+  <div class="box heading col-md-2 col-sm-2 col-xs-2">Title</div>
+  <div class="box title content col-md-10 col-sm-10 col-xs-10"><%= @job.title.titleize %></div>
+
+  <!--deadline-->
+  <div class="box box-left heading col-md-2 col-sm-2 col-xs-2">Deadline</div>
+  <div class="box content col-md-5  col-sm-6 col-xs-6"><%= @job.deadline.strftime("%A, %B %d, %Y %I:%M%p") %></div>
+
+  <!--status-->
+  <div class="box heading col-md-2 col-sm-2 col-xs-2">Status</div>
+  <div class="box content col-md-3 col-sm-2 col-xs-2">
+    <% if @job.status=='done' %>
+      <span class="completed">Completed</span>
+    <% elsif @job.status=='ongoing' && @job.deadline >= Time.now %> 
+      <span class="active">Active</span>    
+    <% elsif @job.status=='ongoing' && @job.deadline < Time.now %>
+      <span class="overdue">Overdue</span>
+    <% end %>
+  </div>
+
+  <!--originator-->
+  <div class="box box-left heading col-md-2 col-sm-2 col-xs-2">Originator</div>
+  <div class="box content col-md-5  col-sm-6 col-xs-6"><strong class='author'><%= @job.user.name %></strong></div>
+
+  <!--charge code-->
+  <div class="box heading col-md-2 col-sm-2 col-xs-2">Charge Code</div>
+  <div class="box content col-md-3 col-sm-2 col-xs-2">
+    <% if @job.chargeCode.blank? %>
+      Not Specified
+    <% else %>
+      <%= @job.chargeCode %>
+    <% end %>
+  </div>
+
+  <!--rig code-->
+  <div class="box heading col-md-2 col-sm-2 col-xs-2">Rig Code</div>
+  <div class="box title content col-md-10 col-sm-10 col-xs-10">
+  
+		<!-- this if statement is necessary to handle the case when the rig used for this job was deleted after the creation of the job--> 
+    <% if Rig.where(id: @job.rig_id).present? %> 
+      <%=  @job.rig.code.titleize %>
+    <% else %>
+      Not Specified
+    <% end %>
+  </div>
+
+  <!--description-->
+  <div class="document box box-left col-md-12 col-sm-12 col-xs-12">
+    <div class="heading">Description of required works</div>
+    <div class="text-justify des">
+      <%= @job.description.html_safe %>
+    </div>   
+  </div>
+
+  <div class="document box box-left col-md-12 col-sm-12 col-xs-12">
+    <div class="heading">Supporting <%= "Document".pluralize(@job.support_documents.count) %></div>
+    <div class="des supporting">      
+      <!--with supporting document-->
+      <% if !@job.support_documents.nil? %>   
+        <% @job.support_documents.each do |f| %>     
+          <%= link_to f.document.url(:original, false) do %>
+            <i class="glyphicon glyphicon-save" ></i> &nbsp; <%= f.document.original_filename %> <br />
+          <% end %>              
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+
+  <!--people involved-->
+  <div class="who box box-full col-md-12 col-sm-12 col-xs-12">
+    <% if @job.status=="ongoing" %>
+      <div class="heading"><strong>Who accepted doing this job</strong></div>
+    <% else %>
+      <div class="heading"><strong>Who completed job</strong></div>
+    <% end %> 
+    <div class='row acc-list'>    
+      <% @job.users.each do |u| %>        
+          <div class='col-md-3 acc-name'><%= u.name.titleize %></div>
+          <div class='col-md-9'>
+            <% time = Acceptor.find_by(job_id: @job.id, user_id: u.id).working_time %>
+            Working time: <strong><%= (time.nil?) ? 'Not Submitted Yet' : "#{time} " "hour".pluralize(time) %></strong>
+          </div>       
+      <% end %>   
+    </div> 
+  </div>  
+</div>
+
+
+<div class="row">   
+  <div class="col-md-12 col-sm-12 col-xs-12">
+
+    <!--Comments section-->
+    <h3><strong><%= "Comment".pluralize(@comments.count) %> (<%= @comments.count %>)</strong></h3>
+
+    <ol class="cmt-list">
+      <% if @comments.any? %>  
+        <% @comments.each do |cmt| %>
+          <li class="cmt-block">  
+            <div class="row img-rounded-div">
+              <aside class="col-md-1  col-sm-1 col-xs-1">
+                <%= image_tag 'default-avatar.png', alt: 'user avatar', class: 'img-rounded'%>
+              </aside>
+
+              <div class="col-md-11  col-sm-11 col-xs-11 row">
+                <!--user's name-->
+                <div class="title">
+                  <strong><%= cmt.user.name.titleize %></strong>
+                  <span class='timestamp'> &nbsp; &#8226; &nbsp;<%= time_ago_in_words(cmt.created_at) %> ago</span>
+                  <div class="pull-right">
+                    <% if ((cmt.user_id==current_user.id)||(current_user.admin?)) %>
+                      <%= form_for :comment, url: comment_path, method: :delete do |a| %>
+                        <%= a.hidden_field :job_id, value: @job.id %>
+                        <%= a.hidden_field :cmt_id, value: cmt.id %>                        
+                        <%= button_tag(class: "remove-btn", data: { confirm: "You want to remove this comment.\n\nAre you sure?" }) do %>
+                          <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                        <% end %>
+                      <% end %>           
+                    <% end %>
+                  </div> 
+                </div>                
+
+                <!--content-->          
+                <div class="text-justify cmt-content">
+                  <%= cmt.content.html_safe %>
+                </div>
+
+                <!--file uploaded-->
+                
+                  <div class="cmt-upload">           
+                    <% if !cmt.comment_files.nil? %>
+                      <% cmt.comment_files.each do |f| %>          
+                        <%= link_to f.upload.url(:original, false) do %>
+                          <i class="glyphicon glyphicon-save">&nbsp; </i><%= f.upload.original_filename %> <br />
+                        <% end %>
+                      <% end %>
+                    <% end %>  
+                  </div>           
+               
+              </div>
+            </div>           
+      
+          </li>     
+        <% end %> 
+      <% end %> 
+
+      <div role="tabpanel" class='job-tab'>
+
+        <!-- Nav tabs -->
+        <ul class="nav nav-tabs" role="tablist">
+          <li role="presentation" class="active"><a href="#comment" aria-controls="comment" role="tab" data-toggle="tab">Comment</a></li>
+          <% if Acceptor.where(user_id: current_user.id, job_id: @job.id).any? %> 
+            <li role="presentation"><a href="#time" aria-controls="time" role="tab" data-toggle="tab">Record Time</a></li>  
+          <% end %>        
+        </ul>
+
+        <!-- Tab panes -->
+        <div class="tab-content">
+          <div role="tabpanel" class="tab-pane active" id="comment">
+            <!--Comment text-area-->
+            <div class="row cmt-text-box">
+              <aside class="col-md-1  col-sm-1 col-xs-1">
+                <%= image_tag 'default-avatar.png', alt: 'user avatar', class: 'img-rounded'%>
+              </aside>
+              <div class="col-md-11  col-sm-11 col-xs-11 row ">         
+                <%= form_for @comment, url: comments_path, html: { multipart: true } do |f| %>
+                  <!--hidden field to store job_id-->
+                  <%= f.hidden_field :job_id, value: @job.id %>  
+                  <!--comment text area-->                 
+                  <%= f.bootsy_area :content, placeholder: "Leave your comment here...", class: "form-control", rows: '4', editor_options: { image: false } %> 
+                  <!--file uploaded with comment-->                       
+                  <div class='col-md-6 col-sm-6 col-xs-6'><%= file_field_tag "files[]", type: :file, multiple: true, class: "upload-btn col-md-6 col-sm-6 col-xs-6" %></div>
+                  <!--submit -->
+                  <div class='col-md-2 col-md-offset-4 col-sm-2 col-sm-offset-4 col-xs-2 col-xs-offset-4'><%= f.submit "Post Comment", class: "post-btn btn btn-sm btn-block btn-primary" %></div>  
+                <% end %> 
+               </div>
+            </div>
+          </div>
+          
+          <% if Acceptor.where(user_id: current_user.id, job_id: @job.id).any? %> 
+            <div role="tabpanel" class="tab-pane row time-record-box" id="time">             
+                <%= form_for :time, url: record_time_path, method: :post do |a| %>
+                  <%= a.hidden_field :job_id, value: @job.id %>                
+                  <div class='col-md-11 col-md-offset-1'><%= a.label :working_time, 'Enter amount of time you spent on this job (in hours)' %></div>  
+                  <br /> <br />
+                  <div class='col-md-4 col-md-offset-1'>
+                    <%= a.number_field :working_time, class: 'form-control', min: 0.0, max: 500, step: 0.1, placeholder: "You can input decimal value", required: true %>
+                  </div>
+                  <div class='col-md-2'><%= a.submit "Record Time", class: "btn btn-default btn-sm left-block" %></div>
+                <% end %>             
+            </div>  
+          <% end %>        
+        </div>
+      </div>     
+    </ol>  
+  </div> 
+</div>
+
+

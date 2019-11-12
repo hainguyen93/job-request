@@ -1,0 +1,279 @@
+<% provide(:title, 'Job Board') %>
+
+<!--Alert when user has some overdue jobs-->
+<% if alert_overdue? && !session[:warning] %>
+  <%= js add_gritter("WARNING: You have overdue tasks", ndom_wrap: true, image: :error) %>
+  <% session[:warning] = true %>
+<% end %>
+
+<!--alert when user has some jobs close to deadline-->
+<% if (alert_deadlines? && !session[:reminder]) %>
+  <%= js add_gritter("REMINDER: Your task is due in 3 days or less", ndom_wrap: true, image: :warning) %>
+  <% session[:reminder] = true %>
+<% end %>
+
+<h1>Job Board</h1>
+
+<div class='row'>     
+  <!--Urgent jobs section-->
+  <div class="sections row">
+    <div class='col-md-11 col-sm-6 col-xs-6'>
+      <strong>Urgent <%= "Job".pluralize(@urgents.count) %></strong>
+    </div>
+    <div class="col-md-1 col-sm-6 col-xs-6 text-right">
+      <span><%= @urgents.count %>  <span class="text-right glyphicon glyphicon-folder-open" aria-hidden="true"></span></span>
+    </div>
+  </div>   
+
+     <ol class="index">       
+       <% if @urgents.any? %>
+        <% @urgents.each do |job| %>          
+          <li class="row job-block" > 
+
+            <aside class="col-md-1 col-sm-2 col-xs-2" onClick="open_link('<%= job_path(job) %>')">
+              <%= image_tag 'urgent-job.png', size: '53x53', class: 'job-avatar' %>
+            </aside>
+            <div class="col-md-11 col-sm-10 col-xs-10 row">
+              <!--title-->
+            <div class="col-md-12 col-sm-12 col-xs-12 title" onClick="open_link('<%= job_path(job) %>')">
+              <span><strong><%= link_to job.title.titleize, job %></strong></span> 
+            </div>           
+ 
+            <!--deadline-->
+            <div class="col-md-5 col-sm-5 col-xs-5 deadline" onClick="open_link('<%= job_path(job) %>')">
+              <span>Deadline: <%= deadline_to_today(job.deadline) %></span>
+            </div>  
+
+             <div class="col-md-3 col-sm-3 col-xs-3 deadline" onClick="open_link('<%= job_path(job) %>')">
+                Accepted by <strong class='author'><%= job.users.count %> <%= "User".pluralize(job.users.count) %></strong>
+             </div>        
+           
+            <!--current user is admin-->
+            <% if current_user.admin? %>
+              <div class="col-md-2 col-sm-2 col-xs-2" onClick="open_link('<%= job_path(job) %>')"></div>
+ 
+              <!--edit button-->
+              <div class="col-md-1 col-sm-1 col-xs-1">            
+                <% if (job.user.id==current_user.id) %>
+                  <%= button_to "Edit", edit_job_path(job), method: :get, class: "btn btn-default btn-block btn-sm" %>  
+                <% end %>
+              </div>
+
+              <!--delete button-->
+              <div class="col-md-1 col-sm-1 col-xs-1"> 
+                <%= button_to "Delete", job_path(job), method: :delete, class: "btn btn-default btn-block btn-sm", 
+                                                       data: { confirm: "You want to remove this job.\n\nAre you sure?" } %>  
+              </div>
+
+            <!--current user is not admin-->
+            <% else %>
+            
+              <!--current user is job's originator-->
+              <% if (job.user.id==current_user.id) %>
+
+                <!--accept button-->
+                <div class="col-md-2 col-sm-2 col-xs-1">                  
+                  <% if !Acceptor.where(user_id: current_user.id, job_id: job.id).any? %> 
+                    <%= form_for @acceptor, url: acceptor_path, method: :post do |a| %>
+                      <%= a.hidden_field :job_id, value: job.id %>
+                      <%= a.submit "Accept", class: "text-center btn btn-default btn-sm center-block" %>
+                    <% end %> 
+                  <% else %>  
+                    <div class='text-center'><i class="glyphicon glyphicon-ok text-center" aria-hidden="true" data-toggle="tooltip" 
+                          data-placement="top" style='color: green;'  title="already accepted"></i></div>
+                   
+                  <% end %>
+                </div> 
+                
+                <!--edit button-->
+                <div class="col-md-1 col-sm-1 col-xs-1">            
+                  <% if (job.user.id==current_user.id) %>
+                    <%= button_to "Edit", edit_job_path(job), method: :get, class: "btn btn-default btn-block btn-sm" %>  
+                  <% end %>
+                </div>
+
+                <!--delete button-->
+                <div class="col-md-1 col-sm-1 col-xs-1"> 
+                  <%= button_to "Delete", job_path(job), method: :delete, class: "btn btn-default btn-block btn-sm", data: { confirm: "You want to remove this job.\n\nAre you sure?" } %>  
+                </div>
+         
+              <!--current user is not admin, not job's originator-->
+              <% else %>
+                <!--accept button-->
+                <div class="col-md-2 col-sm-2 col-xs-2">                  
+                  <% if !Acceptor.where(user_id: current_user.id, job_id: job.id).any? %> 
+                    <%= form_for @acceptor, url: acceptor_path, method: :post do |a| %>
+                      <%= a.hidden_field :job_id, value: job.id %>
+                      <%= a.submit "Accept", class: "btn btn-default btn-sm center-block" %>
+                    <% end %> 
+                  <% else %>                  
+                    <div class='text-center'><i class="glyphicon glyphicon-ok" aria-hidden="true" data-toggle="tooltip" 
+                          data-placement="top" style='color: green;'  title="already accepted"></i> </div>
+                  <% end %>
+                </div> 
+
+              <% end %>
+            <% end %>
+
+            <!--time created-->
+            <div class="timestamp col-md-5 col-sm-5 col-xs-5" onClick="open_link('<%= job_path(job) %>')">
+              <span class="timestamp">
+                Created <strong class='author'><%= time_ago_in_words(job.created_at) %> ago</strong>
+              </span> 
+            </div>
+
+            <% if !Acceptor.where(user_id: current_user.id, job_id: job.id).any? %>               
+              <!--how many people are working-->
+              <div class='col-md-7 col-sm-7 col-xs-7 timestamp' onClick="open_link('<%= job_path(job) %>')">
+                Originator: <strong class='author'><%= job.user.name %></strong>
+              </div>
+            <% else %>
+              <div class='col-md-3 col-sm-3 col-xs-3 timestamp' onClick="open_link('<%= job_path(job) %>')">
+                Originator: <strong class='author'><%= job.user.name %></strong>
+              </div>
+              <div class='text-center col-md-2 col-sm-2 col-xs-2' onClick="open_link('<%= job_path(job) %>')">
+                <span>Already Accepted</span>
+              </div>
+            <% end %>
+              
+            </div> 
+          </li>  
+      <% end %>
+    <% end %> 
+    </ol> 
+    <div class='col-md-12 col-sm-12 col-xs-12'><%= will_paginate @urgents, param_name: 'urgents_page' %></div>
+</div> 
+  
+<div class='row'>
+    <!--current job section-->
+    <div class="sections row">
+      <div class="col-md-11 col-sm-6 col-xs-6 "><strong>Current <%= "Job".pluralize(@currents.count) %></strong></div>
+      <div class="col-md-1 col-sm-6 col-xs-6 text-right"><span><%= @currents.count %>  <span class="text-right glyphicon glyphicon-folder-open" aria-hidden="true"></span></span></div>
+    </div>   
+    
+    <ol class="index">
+      <% if @currents.any? %>
+        <% @currents.each do |job| %>
+          <li class="row job-block" >  
+
+            <aside class="col-md-1 col-sm-2 col-xs-2" onClick="open_link('<%= job_path(job) %>')">
+              <%= image_tag 'job.png', size: '53x53', class: 'job-avatar' %>
+            </aside>
+            <div class="col-md-11 col-sm-10 col-xs-10 row box">
+              <!--title-->
+            <div class="col-md-12 col-sm-12 col-xs-12 title" onClick="open_link('<%= job_path(job) %>')">
+              <span><strong><%= link_to job.title.titleize, job %></strong></span>
+            </div>
+
+            <!--deadline-->
+            <div class="col-md-5 col-sm-5 col-xs-5 deadline" onClick="open_link('<%= job_path(job) %>')">
+              <span>Deadline: <%= deadline_to_today(job.deadline) %></span>
+            </div> 
+
+            <div class="col-md-3 col-sm-3 col-xs-3 deadline" onClick="open_link('<%= job_path(job) %>')">
+                Accepted by <strong class='author'><%= job.users.count %> <%= "User".pluralize(job.users.count) %></strong>
+            </div>             
+           
+            <!--current user is admin-->
+            <% if current_user.admin? %>
+              <!--button for admin to mark job as urgent job-->
+              <div class="col-md-1 col-md-offset-1 col-sm-1 col-sm-offset-1 col-xs-1 col-xs-offset-1">
+                <% if current_user.admin? %>
+                  <%= form_for :urgent, url: urgent_path, method: :post do |a| %>
+                    <%= a.hidden_field :job_id, value: job.id %>
+                    <%= a.submit "Urgent", class: "btn btn-default btn-sm btn-block", data: { confirm: "You want to move this job to urgent area\n\n Are you sure?" } %>
+                  <% end %> 
+                <% end %> 
+              </div>       
+ 
+              <!--edit button-->
+              <div class="col-md-1 col-sm-1 col-xs-1">            
+                <% if (job.user.id==current_user.id) %>
+                  <%= button_to "Edit", edit_job_path(job), method: :get, class: "btn btn-default btn-block btn-sm" %>  
+                <% end %>
+              </div>
+
+              <!--delete button-->
+              <div class="col-md-1 col-sm-1 col-xs-1"> 
+                <%= button_to "Delete", job_path(job), method: :delete, class: "btn btn-default btn-block btn-sm", data: { confirm: "You want to remove this job.\n\nAre you sure?" }%>  
+              </div>
+
+            <!--current user is not admin-->
+            <% else %>
+            
+              <!--current user is job's originator-->
+              <% if (job.user.id==current_user.id) %>
+
+                <!--accept button-->
+                <div class="col-md-2 col-sm-2 col-xs-2">                  
+                  <% if !Acceptor.where(user_id: current_user.id, job_id: job.id).any? %> 
+                    <%= form_for @acceptor, url: acceptor_path, method: :post do |a| %>
+                      <%= a.hidden_field :job_id, value: job.id %>
+                      <%= a.submit "Accept", class: " btn btn-default btn-sm center-block" %>
+                    <% end %> 
+                  <% else %>                  
+                    <div class='text-center'><i class="glyphicon glyphicon-ok" aria-hidden="true" data-toggle="tooltip" 
+                          data-placement="top" style='color: green;'  title="already accepted"></i></div>
+                  <% end %>
+                </div> 
+                
+                <!--edit button-->
+                <div class="col-md-1 col-sm-1 col-xs-1">            
+                  <% if (job.user.id==current_user.id) %>
+                    <%= button_to "Edit", edit_job_path(job), method: :get, class: "btn btn-default btn-block btn-sm" %>  
+                  <% end %>
+                </div>
+
+                <!--delete button-->
+                <div class="col-md-1 col-sm-1 col-xs-1"> 
+                  <%= button_to "Delete", job_path(job), method: :delete, class: "btn btn-default btn-block btn-sm", data: { confirm: "You want to remove this job.\n\nAre you sure?" } %>  
+                </div>
+         
+              <!--current user is not admin, not job's originator-->
+              <% else %>
+                <!--accept button-->
+                <div class="col-md-2 col-sm-2 col-xs-2">                  
+                  <% if !Acceptor.where(user_id: current_user.id, job_id: job.id).any? %> 
+                    <%= form_for @acceptor, url: acceptor_path, method: :post do |a| %>
+                      <%= a.hidden_field :job_id, value: job.id %>
+                      <%= a.submit "Accept", class: " btn btn-default center-block btn-sm" %>
+                    <% end %> 
+                  <% else %>                  
+                    <div class='text-center'><i class="glyphicon glyphicon-ok" aria-hidden="true" data-toggle="tooltip" 
+                          data-placement="top" style='color: green;' title="already accepted"></i> </div>
+                  <% end %>
+                </div> 
+              <% end %>
+            <% end %>
+
+           <!--time created-->
+            <div class="timestamp col-md-5 col-sm-5 col-xs-5" onClick="open_link('<%= job_path(job) %>')">
+              <span class="timestamp">
+                Created <strong class='author'><%= time_ago_in_words(job.created_at) %> ago</strong>
+              </span> 
+            </div>
+
+           <% if !Acceptor.where(user_id: current_user.id, job_id: job.id).any? %>               
+              <!--how many people are working-->
+              <div class='col-md-7 col-sm-7 col-xs-7 timestamp' onClick="open_link('<%= job_path(job) %>')">
+                Originator: <strong class='author'><%= job.user.name %></strong>
+              </div>
+            <% else %>
+              <div class='col-md-3 col-sm-3 col-xs-3 timestamp' onClick="open_link('<%= job_path(job) %>')">
+                Originator: <strong class='author'><%= job.user.name %></strong>
+              </div>
+              <div class='text-center col-md-2 col-sm-2 col-xs-2 timestamp' onClick="open_link('<%= job_path(job) %>')">
+                <span>Already Accepted</span>
+              </div>
+            <% end %>
+
+            </div>   
+          </li>           
+        <% end %>      
+     
+     <% end %>  
+    </ol>  
+    <div class='col-md-12 col-sm-12 col-xs-12'> <%= will_paginate @currents, param_name: 'currents_page' %></div>
+</div>
+
+

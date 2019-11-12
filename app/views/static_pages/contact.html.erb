@@ -1,0 +1,56 @@
+<% provide(:title, 'Contact') %>
+<h1 class='col-md-4 col-md-offset-6 col-sm-12 col-xs-12'>
+  Contact Us
+</h1>
+
+<div class="row">
+  <aside class='col-md-4 col-md-offset-1 col-sm-4 col-xs-5'>
+    <div><i class="glyphicon glyphicon-home" id='home' aria-hidden="true"></i> &nbsp;<span  style='color: #ff9800;'>WE ARE HERE</span></div>   
+    <br />        
+    <address>
+      <strong>LOW CARBON COMBUSTION CENTER</strong><br>
+      Unit 2 Crown Works Industrial Estate <br />
+      Rotherham Road <br />
+      Sheffield <br />
+      South Yorkshire <br />
+      S20 1AH <br />
+      United Kingdom <br /> 
+    </address>
+   
+    <address>
+      <strong>Dr. Simon Blakey</strong><br>
+      <a href="mailto: S.Blakey@shef.ac.uk">S.Blakey@shef.ac.uk</a> <br />
+      <span class="glyphicon glyphicon-phone-alt" aria-hidden="true"></span> +44 (0)114 269 8981
+    </address>
+  
+  </aside>  
+  <div class="col-md-6 col-sm-8 col-xs-7">
+    <%= form_for @message, url: contact_path do |f| %>
+      <%= render 'shared/error_messages', object: f.object %>      
+      <div class="input-group">
+        <span class="input-group-addon" id="basic-addon1">
+          <span class="glyphicon glyphicon-user" aria-hidden="true" data-toggle="tooltip" 
+                          data-placement="top" title="Your Name"></span>
+        </span>
+        <%= f.text_field :name, class: 'form-control', placeholder: "Your name", required: true %>
+      </div> 
+      
+      <br />       
+      <div class="input-group">
+        <span class="input-group-addon" id="basic-addon1">
+          <span class="glyphicon glyphicon-envelope" aria-hidden="true" data-toggle="tooltip" 
+                          data-placement="top" title="Your Email" ></span>
+        </span>
+        <%= f.email_field :email, class: 'form-control', placeholder: "Your email", required: true %> 
+      </div> 
+       
+      <br/>            
+      <%= f.text_area :content, placeholder: "Type your message here...", class: 'form-control', rows: '8', required: true %>  
+      <br />
+      <%= f.submit "Send Message", class: "btn btn-primary col-md-4 col-md-offset-8 col-sm-5 col-sm-offset-7 col-xs-12" %>
+    <% end %>
+    
+  </div>
+</div>
+
+

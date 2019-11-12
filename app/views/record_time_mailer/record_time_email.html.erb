@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
+  </head>
+  <body>
+    <h1>Job Request System</h1>
+    <p> Job <strong><%= @job.title %></strong> has just been finished.</p>
+    <p> Please click link below to enter the amount of time you spent on doing it.</p>   
+    <%= link_to "Record Time Spent On Job", job_url(@job) %> 
+  </body>
+</html>

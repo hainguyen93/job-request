@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
+  </head>
+  <body>
+    <h2>Job Request System</h2>
+    <p>Job <strong><%= @job.title %></strong> was completed.</p> 
+    <%= link_to "Go to Job", job_url(@job) %>    
+  </body>
+</html>

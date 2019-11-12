@@ -1,0 +1,17 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+admin:
+  username: admin
+  name: Administrator
+  email: admin@gmail.com
+  password_digest: <%= User.digest('hai5193') %>
+  admin: true
+  disabled: false
+
+staff:
+  username: staff
+  name: Staff
+  email: staff@gmail.com
+  password_digest: <%= User.digest('hai5193') %>
+  admin: false
+  disabled: false

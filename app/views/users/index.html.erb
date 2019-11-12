@@ -1,0 +1,110 @@
+<% provide(:title, 'All Users') %>
+<h1>All Users</h1>
+
+<div class='row'>
+  
+  <div class="sections row">
+    <div class='col-md-6 col-sm-6 col-xs-6'>
+      <strong>
+        <%= "Administrator".pluralize(@admins.count) %>
+      </strong>
+    </div>
+    <div class="col-md-6 col-sm-6 col-xs-6 text-right">
+      <span>
+        <%= @admins.count %> <i class="glyphicon glyphicon-user" aria-hidden="true"></i>
+      </span>
+    </div>
+  </div>
+  <ul class="index">
+    <% @admins.each do |admin| %>
+     
+      <li class="row user-block"> 
+        <aside class="col-md-1 col-sm-2 col-xs-2">
+          <%= image_tag 'user.png', size: '45x45', class: 'user-avatar' %>
+        </aside>
+        <div class="col-md-11 col-sm-10 col-xs-10 row">
+          <!--name-->
+          <div class="title col-md-12 col-sm-12 col-xs-12"><strong><%= admin.name.titleize %></strong></div>
+          
+          <div class="col-md-10 col-sm-6 col-xs-6 deadline">      
+                       
+            <!--username-->
+            <% if current_user.admin? %>
+              Username: <span id="username"><%= admin.username %> </span>|
+            <% end %>
+
+            <!--Email-->
+            <span>Email: <i><%= mail_to admin.email %></i></span>  
+          </div>          
+          <div class='col-md-1 col-sm-3 col-xs-3'></div>
+          <% if current_user.admin? %>
+            <!--Edit button-->
+            <div class="col-md-1 col-sm-3 col-xs-3 text-right disappear">
+              <%= link_to "Edit", edit_user_path(admin), class:'btn btn-default btn-block btn-sm' %>
+            </div>   
+            
+          <% end %>
+        </div>      
+        
+      </li>
+    <% end %>
+  </ul>
+  <div class='col-md-12 col-sm-12 col-xs-12'><%= will_paginate @admins, param_name: 'admins_page' %></div>
+
+</div> 
+
+<div class='row'> 
+  <div class="sections row">
+     <div class="col-md-6 col-sm-6 col-xs-6"><strong><%= "Member".pluralize(@users.count) %></strong></div>
+     <div class="col-md-6 col-sm-6 col-xs-6 text-right"><span><%= @users.count %>  <i class="glyphicon glyphicon-user" aria-hidden="true"></i></span></div>
+  </div>
+  
+  <ul class="index">
+    <% @users.each do |user| %>
+     
+      <li class="row user-block"> 
+        <aside class="col-md-1 col-sm-2 col-xs-2">
+          <%= image_tag 'user.png', size: '45x45', class: 'user-avatar' %>
+        </aside>
+        <div class="col-md-11 col-sm-10 col-xs-10 row">
+          <!--name-->
+          <div class="title col-md-12 col-sm-12 col-xs-12"><strong><%= user.name.titleize %></strong></div>
+          
+          <div class="col-md-10 col-sm-8 col-xs-8 deadline">                     
+
+            <!--username-->
+            <% if current_user.admin? %>
+              Username: <span id="username"><%= user.username %> </span>|
+            <% end %>
+
+            <!--Email-->
+            <span>Email: <i><%= mail_to user.email %></i></span>  
+          </div>          
+                    
+          <% if current_user.admin? %>
+            <!--Edit button-->
+            <div class="col-md-1 col-sm-2 col-xs-2">
+              <%= link_to "Edit", edit_user_path(user), class:'btn btn-default btn-block btn-sm' %>
+            </div>
+       
+            <!--delete button-->
+            <div class="col-md-1 col-sm-2 col-xs-2">
+              <%= form_for :disable_user, url: disable_path do |f| %>
+                <%= f.hidden_field :user_id, value: user.id %>
+                <%= f.submit "Delete", class:'btn btn-default btn-block btn-sm', 
+                                       data: { confirm: "You want to remove this user.\n\nAre you sure ?" } %>
+              <% end %>               
+            </div>
+          <% elsif (current_user.id == user.id) %>
+
+            <!--user can edit their own information-->
+            <div class="col-md-2 col-sm-2 col-xs-2">
+              <%= link_to "Edit Profile", edit_user_path(user), class: 'btn btn-default center-block btn-sm' %>
+            </div>
+          <% end %>
+        </div>  
+      </li>
+    <% end %>
+  </ul>
+  <div class='col-md-12 col-sm-12 col-xs-12'><%= will_paginate @users, param_name: 'users_page' %></div>
+</div>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+  <html>
+    <head>
+      <%= favicon_link_tag do %> <i class="fa fa-pencil-square"></i> <% end %>
+      <title><%= page_title(yield(:title)) %></title>
+      <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track' => true %>
+      <%= javascript_include_tag 'application', 'data-turbolinks-track' => true %>
+      <%= csrf_meta_tags %>
+      <script type="text/javascript">
+        $(document).ready(function(){
+          setTimeout(function(){$('#flash').remove();}, 5000);   <!--flash message disappears after 4s-->
+        })
+      </script>
+    </head>
+    <body>
+      <!--Header-->
+      <%= render 'layouts/header' %> 
+      <!--content-->
+      <div class="wrapper" id='main-content'>      
+            <% flash.each do |message_type, message| %>
+              <div class="alert alert-<%= message_type %>" id="flash" ><%= message %></div>
+            <% end %>
+            <div id='inner-content'><%= yield %></div>           
+      </div>    
+      <!--Footer-->  
+      <%= render 'layouts/footer' %>   
+    </body>
+  </html>

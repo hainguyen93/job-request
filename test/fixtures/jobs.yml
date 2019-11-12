@@ -1,0 +1,35 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+normal_job:
+  chargeCode: 12345
+  rig: rig1
+  title: 'Normal Job'
+  deadline: 2016-03-23 14:20:29
+  user: admin
+  description: 'something'
+  urgent: false
+  status: ongoing
+  created_at: <%= 2.days.ago %>
+
+urgent_job:
+  chargeCode: 54321
+  rig: rig2
+  title: 'Urgent Job'
+  deadline: 2016-03-23 14:20:29
+  user: admin
+  description: 'something'
+  urgent: true
+  status: ongoing
+  created_at: <%= 1.month.ago %>
+
+job: 
+  chargeCode: 54321
+  rig: rig1
+  title: 'A Job'
+  deadline: 2016-03-23 14:20:29
+  user: staff
+  description: 'something'
+  urgent: false
+  status: ongoing
+  created_at: <%= 1.month.ago %>
+

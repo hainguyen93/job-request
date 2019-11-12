@@ -1,0 +1,6 @@
+# Email used by the system.
+# If you want to change it, make sure you do it before deploying the system.
+
+GMAIL_USERNAME: 'noreply.jobrequestsystem@gmail.com'
+
+GMAIL_PASSWORD: 'sheffield2015'

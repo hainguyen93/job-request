@@ -1,0 +1,49 @@
+<% provide(:title, 'Edit Job') %>
+<h1>Edit Job</h1>
+
+<div class="row">
+  <div class="col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2 col-xs-8 col-xs-offset-2">
+    <%= form_for @job, url: job_path, html: { multipart: true } do |f| %>
+
+      <%= render 'shared/error_messages', object: f.object %>
+
+       <!--job title--> 
+      <%= f.label :title, 'Title' %>  
+      <%= f.text_field :title, class: 'form-control', required: true %>
+      <br /> 
+
+       <!--job charge code--> 
+      <%= f.label :chargeCode, 'Charge Code' %>  
+      <%= f.text_field :chargeCode, class: 'form-control', placeholder: "If unknown, leave blank..." %>
+      <br />  
+
+       <!--job rig code--> 
+      <%= f.label :rig_id, 'Rig Code' %>  
+      <%= f.collection_select :rig_id, Rig.all, :id, :code, {prompt: "Select a rig code"}, {class: "form-control", required: true } %>
+      <br />              
+   
+       <!--job deadline--> 
+      <%= f.label :deadline, 'Deadline' %>
+      <%= f.datetime_select :deadline %>       
+      <br />
+      <br />
+
+       <!--job description--> 
+      <%= f.label :description, 'Description of required work' %>       
+      <%= f.bootsy_area :description, placeholder: "Descibe your job here...",class: 'form-control', rows: '10',
+                                       editor_options: { image: false } %>  
+      <br />   
+
+       <!--supporting documents-->     
+      <%= f.label :document, 'Supporting Documents' %>      
+      <%= file_field_tag "files[]", type: :file, multiple: true %>      
+      <br />
+
+       <!--submit button--> 
+      <%= f.submit "Edit Job", class: "btn btn-block btn-primary" %>
+    <% end %>
+    
+  </div>
+</div>
+
+

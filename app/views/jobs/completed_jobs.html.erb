@@ -1,0 +1,56 @@
+<% provide(:title, 'Completed Jobs') %>
+<h1>Completed <%= "Job".pluralize(@completed_jobs.count) %> <span style='color: #7e8aa2;'>(<%= @completed_jobs.count %>)</span></h1>
+
+<div class='row'>
+  <% if @completed_jobs.any? %>      
+    <ol class="index job-done-index">
+      <% @completed_jobs.each do |job| %>
+        <li class="row job-block job-done-block">  
+          <aside class="col-md-1 col-sm-2 col-xs-2" onClick="open_link('<%= job_path(job) %>')">
+            <i class="glyphicon glyphicon-folder-close job-done-avatar" aria-hidden="true"></i>
+          </aside>
+          <div class="col-md-11 col-sm-10 col-xs-10">
+            <!--title-->
+            <div class="col-md-12 col-sm-12 col-xs-12 title" onClick="open_link('<%= job_path(job) %>')">
+              <strong><%= link_to job.title.titleize, job %></strong>
+            </div>
+
+            <!--deadline-->
+            <div class="col-md-5 col-sm-5 col-xs-5 deadline" onClick="open_link('<%= job_path(job) %>')">
+              Deadline: <%= deadline_to_today(job.deadline) %> 
+            </div>
+
+            <div class="col-md-5 col-sm-6 col-xs-6 deadline" onClick="open_link('<%= job_path(job) %>')">
+                Accepted by <strong class='author'><%= job.users.count %> <%= "User".pluralize(job.users.count) %></strong>
+             </div>  
+            
+            <!--Reactivate button-->
+            <div class='col-md-2'>
+              <% if current_user.admin? %>
+                <%= form_for :undo, url: reactivate_job_path, method: :post do |a| %>
+                  <%= a.hidden_field :job_id, value: job.id %>
+                  <%= a.submit "Re-activate", class: "btn btn-default center-block btn-sm", data: { confirm: "Make this job active again.\n\nAre you sure?" } %>
+                <% end %>  
+              <% end %>
+            </div>
+
+            <!--time created-->
+            <div class="timestamp col-md-5 col-sm-5 col-xs-5" onClick="open_link('<%= job_path(job) %>')">
+              <span class="timestamp">
+                Created <strong class='author'><%= time_ago_in_words(job.created_at) %> ago</strong>
+              </span> 
+            </div>
+
+            <!--how many people are working-->
+            <div class='col-md-7 col-sm-7 col-xs-7 timestamp' onClick="open_link('<%= job_path(job) %>')">
+              Originator: <strong class='author'><%= job.user.name %></strong>
+            </div>
+         </div>         
+        </li>     
+      <% end %>      
+    </ol>
+
+    <%= will_paginate @completed_jobs %>
+
+  <% end %> 
+</div>

@@ -1,0 +1,11 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+admin_cmt:
+  user: admin
+  job: urgent_job
+  content: 'something'
+
+staff_cmt:
+  user: staff
+  job: normal_job
+  content: 'something'

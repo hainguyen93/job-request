@@ -1,0 +1,43 @@
+<% provide(:title, 'Edit User') %>
+<h1>Edit User</h1>
+
+<div class="row">
+  <div class="col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 col-xs-8 col-xs-offset-2">
+    <%= form_for(@user) do |f| %>
+
+      <!--show error messages-->
+      <%= render 'shared/error_messages', object: f.object %>
+
+      <!--user's name-->
+      <%= f.label :name, 'Name' %>  
+      <%= f.text_field :name, class: 'form-control', required: true %>
+      <br /> 
+
+      <!--user's email-->
+      <%= f.label :email, 'Email' %>  
+      <%= f.email_field :email, class: 'form-control', required: true %>
+      <br />      
+
+      <!--username-->        
+      <%= f.label :username, 'Username' %>
+      <%= f.text_field :username, class: 'form-control', required: true %>       
+      <br />
+
+      <!--password-->
+      <%= f.label :password, 'Password' %>
+      <%= f.password_field :password, class: 'form-control', required: true %>       
+      <br />
+
+      <!--password confirmation-->
+      <%= f.label :password_confirmation, 'Password Confirmation' %>
+      <%= f.password_field :password_confirmation, class: 'form-control', required: true %>
+      <br />        
+
+      <!--submit button-->         
+      <%= f.submit "Edit User", class: "btn btn-block btn-primary" %>
+
+    <% end %>    
+  </div>
+</div>
+
+

@@ -1,0 +1,143 @@
+<% provide(:title, 'My Jobs') %>
+<h1>My Current Jobs</h1>
+
+<div class='row'>
+    <!--Urgent jobs section-->
+    <div class="row sections">
+      <div class="col-md-12 col-sm-12 col-xs-12"><strong>Urgent Jobs </strong>
+      </div>  
+    </div>
+
+    <ol class="index">
+    <% if @urgents.any? %>    
+      
+        <% @urgents.each do |job| %>
+          <% if Acceptor.where(user_id: current_user.id, job_id: job.id).any? %>
+            <li class="row job-block">  
+
+              <aside class="col-md-1 col-sm-2 col-xs-2" onClick="open_link('<%= job_path(job) %>')">
+                <%= image_tag 'urgent-job.png', size: '53x53', class: 'job-avatar' %>
+              </aside>
+              <div class="col-md-11 col-sm-10 col-xs-10 row">
+                 <!--title-->
+              <div class="col-md-12 col-sm-12 col-xs-12 title" onClick="open_link('<%= job_path(job) %>')">
+                <strong><%= link_to job.title.titleize, job %></strong>
+              </div>
+
+              <!--deadline-->
+              <div class="col-md-5 col-sm-5 col-xs-5 deadline" onClick="open_link('<%= job_path(job) %>')">
+                Deadline: <%= deadline_to_today(job.deadline) %> 
+              </div>  
+
+              <div class="col-md-5 col-sm-5 col-xs-5 deadline" onClick="open_link('<%= job_path(job) %>')">
+                Accepted by <strong class='author'><%= job.users.count %> <%= "User".pluralize(job.users.count) %></strong>
+              </div>                          
+
+              <!--button for user to edit their own job-->
+              <div class="col-md-1 col-sm-1 col-xs-1">
+                <% if (job.user.id==current_user.id) %>
+                  <%= button_to "Edit", edit_job_path(job), method: :get, class: "btn btn-default btn-block btn-sm" %>  
+                <% end %>
+              </div>
+
+              <!--button for user to close job they currently involved-->  
+              <div class="col-md-1 col-sm-1 col-xs-1">         
+                <%= form_for :done, url: close_job_path, method: :post do |a| %>
+                  <%= a.hidden_field :job_id, value: job.id %>
+                  <%= a.submit "Close", class: "btn btn-default btn-block btn-sm", data: { confirm: "You can only close job if everything related to this job have been finished, including your parts and other people's. \n\nAre you sure?" } %>
+                <% end %> 
+              </div>     
+
+              <!--time created-->
+            <div class="timestamp col-md-5 col-sm-5 col-xs-5"  onClick="open_link('<%= job_path(job) %>')">
+              <span class="timestamp">
+                Created <strong class='author'><%= time_ago_in_words(job.created_at) %> ago</strong>
+
+              </span> 
+            </div>
+
+            <!--how many people are working-->
+            <div class='col-md-7 col-sm-7 col-xs-7 timestamp'  onClick="open_link('<%= job_path(job) %>')">
+              Originator: <strong class='author'><%= job.user.name %></strong>
+            </div>              
+              </div>                 
+
+            </li>             
+          <% end %>
+        <% end %>  
+    <% end %> 
+    </ol>
+</div>  
+
+<div class='row'>
+    <!--current job section--> 
+    <div class="sections row">
+      <div class="col-md-12 col-sm-12 col-xs-12"><strong>Current Jobs </strong>
+      </div>
+    </div>   
+
+    
+    <ol class="index">
+      <% if @currents.any? %>
+        <% @currents.each do |job| %>
+          <% if Acceptor.where(user_id: current_user.id, job_id: job.id).any? %>
+            
+            <li class="row job-block"> 
+
+            <aside class="col-md-1  col-sm-2 col-xs-2" onClick="open_link('<%= job_path(job) %>')">
+              <%= image_tag 'job.png', size: '53x53', class: 'job-avatar' %>
+            </aside>
+            <div class="col-md-11 col-sm-10 col-xs-10 row">
+              <!--title-->
+              <div class="col-md-12 col-sm-12 col-xs-12 title" onClick="open_link('<%= job_path(job) %>')">
+                <strong><%= link_to job.title.titleize, job %></strong>
+              </div>
+
+              <!--deadline-->
+              <div class="col-md-5 col-sm-5 col-xs-5 deadline" onClick="open_link('<%= job_path(job) %>')">
+                Deadline: <%= deadline_to_today(job.deadline) %> 
+              </div>
+
+              <div class="col-md-5 col-sm-5 col-xs-5 deadline" onClick="open_link('<%= job_path(job) %>')">
+                Accepted by <strong class='author'><%= job.users.count %> <%= "User".pluralize(job.users.count) %></strong>
+             </div>  
+ 
+              <!--button for user to edit own job--> 
+              <div class="col-md-1 col-sm-1 col-xs-1">
+                <% if job.user.id==current_user.id %>
+                  <%= button_to "Edit", edit_job_path(job), method: :get, class: 'btn btn-default btn-block btn-sm'  %>  
+                <% end %>
+              </div>
+
+              <!--button for user to close job they currently involved-->  
+              <div class="col-md-1 col-sm-1 col-xs-1">         
+                <%= form_for :done, url: close_job_path, method: :post do |a| %>
+                  <%= a.hidden_field :job_id, value: job.id %>
+                  <%= a.submit "Close", class: "btn btn-default btn-block btn-sm", data: { confirm: "You can only close job if everything related to this job have been finished, including your parts and other people's. \n\nAre you sure?" } %>
+                <% end %>
+              </div> 
+
+              <!--time created-->
+            <div class="timestamp col-md-5 col-sm-5 col-xs-5" onClick="open_link('<%= job_path(job) %>')">
+              <span class="timestamp">
+                Created <strong class='author'><%= time_ago_in_words(job.created_at) %> ago</strong>
+
+              </span> 
+            </div>
+
+            <!--how many people are working-->
+            <div class='col-md-7 col-sm-7 col-xs-7 timestamp' onClick="open_link('<%= job_path(job) %>')">
+              Originator: <strong class='author'><%= job.user.name %></strong>
+            </div>
+
+            </div>               
+            </li>   
+          <% end %>
+        <% end %> 
+    <% end %>   
+    </ol>
+ </div>
+
+  
+  
+
